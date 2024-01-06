@@ -28,18 +28,22 @@ namespace ClipDataMod
         {
             Application.Idle -= Init;
 
-            //Register event filter
+            //Register event filter to catch clipboard change event
             _eventFilter = new ClipboardEventFilter();
             _eventFilter.Register();
             Application.AddMessageFilter(_eventFilter);
+
             //Create context menu
             _menuHandler = new MenuHandler();
             _eventFilter.ClipboardChanged += (_) => _menuHandler.UpdateMenu();
+
             //Register clipboard helper functions
             PluginHelper.InitHelper(
                 _eventFilter.RunOnUiThread,
                 new WindowsClipboard(),
                 new WindowsDialog(_menuHandler.NotifyIcon));
+
+            //Load all plugins
             SearchPlugins();
         }
 
@@ -52,32 +56,25 @@ namespace ClipDataMod
                 _menuHandler?.AddMenuItem(plugin);
             }
             //Load external plugins
-            var pluginDir = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath)!, "Plugins");
-            if (Directory.Exists(pluginDir))
+            foreach (var info in PluginHelper.SearchPlugins())
             {
-                foreach (var dir in Directory.GetDirectories(pluginDir))
+                Assembly a;
+                try
                 {
-                    foreach (var file in Directory.GetFiles(dir, "*.dll"))
-                    {
-                        Assembly a;
-                        try
-                        {
-                            a = Assembly.LoadFile(file);
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.Print($"Unable to load {file} as assembly. {ex.Message}");
-                            continue;
-                        }
-                        try
-                        {
-                            plugins = PluginHelper.LoadPlugins(a);
-                        }
-                        catch (Exception ex)
-                        {
-                            PluginHelper.Dialog.Exception(ex, "Failed to load plugins", null);
-                        }
-                    }
+                    a = Assembly.LoadFile(info.FileName);
+                }
+                catch (Exception ex)
+                {
+                    Debug.Print($"Unable to load {info.FileName} as assembly. {ex.Message}");
+                    continue;
+                }
+                try
+                {
+                    plugins = PluginHelper.LoadPlugins(a, info.Excludes);
+                }
+                catch (Exception ex)
+                {
+                    PluginHelper.Dialog.Exception(ex, "Failed to load plugins", null);
                 }
             }
         }

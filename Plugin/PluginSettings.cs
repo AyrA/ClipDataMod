@@ -6,7 +6,7 @@ using System.Text.Json;
 namespace Plugin
 {
     /// <summary>
-    /// Provides access to plugin functionality
+    /// Provides access to plugin settings
     /// </summary>
     public abstract class PluginSettings : IPlugin
     {

@@ -3,6 +3,7 @@ using Plugin.UI;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 
 namespace Plugin
 {
@@ -84,26 +85,80 @@ namespace Plugin
         }
 
         /// <summary>
+        /// Searches for plugins in the standard plugin folder
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<PluginInfo> SearchPlugins()
+        {
+            var pluginDir = Path.Combine(AppContext.BaseDirectory, "Plugins");
+            try
+            {
+                Directory.CreateDirectory(pluginDir);
+            }
+            catch
+            {
+                //NOOP
+            }
+            if (Directory.Exists(pluginDir))
+            {
+                foreach (var dir in Directory.GetDirectories(pluginDir))
+                {
+                    var infoFile = Path.Combine(dir, "info.json");
+                    if (File.Exists(infoFile))
+                    {
+                        PluginInfo? info;
+                        try
+                        {
+                            info = JsonSerializer.Deserialize<PluginInfo>(File.ReadAllText(infoFile));
+                            if (info == null)
+                            {
+                                throw new Exception("Failed to deserialize JSON into valid PluginInfo structure");
+                            }
+                            info.ToFullPath(dir);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.Print($"Unable to load plugin info from {infoFile}.");
+                            Debug.Print(ex.ToString());
+                            continue;
+                        }
+                        yield return info;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Loads plugins from the given assembly
         /// </summary>
         /// <param name="a">Assembly to load plugins from</param>
+        /// <param name="excludes">Full type names to not load</param>
         /// <returns>Loaded plugins</returns>
         /// <remarks>
         /// This will instantiate every plugin instance
         /// and call <see cref="AddPlugin(IPlugin)"/> for each one
         /// </remarks>
-        public static IPlugin[] LoadPlugins(Assembly a)
+        public static IPlugin[] LoadPlugins(Assembly a, string[]? excludes = null)
         {
+            excludes ??= [];
             var ret = new List<IPlugin>();
             var pluginInterfaceType = typeof(IPlugin);
             var pluginInterfaceName = pluginInterfaceType.FullName ?? pluginInterfaceType.Name;
             foreach (var t in a.GetTypes())
             {
+                if (excludes.Contains(t.FullName))
+                {
+                    Debug.Print(
+                        "Plugin {0} is skipped because it's contained in the exclusion list",
+                        t.FullName);
+                    continue;
+                }
+
                 if (t.GetInterface(pluginInterfaceName) != null)
                 {
-                    Debug.Print("Loading plugin from {0}", t.FullName ?? t.Name);
+                    Debug.Print("Loading plugin from {0}", t);
                     var c = t.GetConstructor(Type.EmptyTypes)
-                        ?? throw new InvalidOperationException($"Plugin {t.FullName ?? t.Name} has no parameterless constructor");
+                        ?? throw new InvalidOperationException($"Plugin {t} has no parameterless constructor");
                     var p = (IPlugin)c.Invoke([]);
                     ret.Add(p);
                 }
@@ -117,10 +172,11 @@ namespace Plugin
         /// Loads plugins from the given assembly file (usually a DLL)
         /// </summary>
         /// <param name="fileName">File name</param>
+        /// <param name="excludes">Full type names to not load</param>
         /// <returns>Loaded plugins</returns>
-        public static IPlugin[] LoadPlugins(string fileName)
+        public static IPlugin[] LoadPlugins(string fileName, string[]? excludes = null)
         {
-            return LoadPlugins(Assembly.LoadFrom(fileName));
+            return LoadPlugins(Assembly.LoadFrom(fileName), excludes);
         }
 
         /// <summary>

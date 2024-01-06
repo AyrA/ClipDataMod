@@ -137,3 +137,9 @@ To get access to plugin settings, a plugin can inherit from the `PluginSettings`
 Any data that is JSON serializable can be saved and loaded. Settings are kept on a per-plugin base in the same directory the plugin is in.
 
 **Note** Settings are immediately written to disk on every call to `SetValue`. Do not call this function if the data did not change, because it leads to unnecessary disk activity.
+
+## Distribution
+
+For distribution, create a file named `info.json` next to the main plugin DLL. The file should consist of a sole JSON object with two entries `fileName` and `excludes`. `fileName` specifies the name of the DLL file that contains the plugins relative to the location of the info.json file. `fileName` is required.
+`excludes` is an array of strings which contain full type names (`this.GetType().FullName`) of plugins that should **not** be loaded. `excludes` is optional and may be empty, null, or absent.
+
