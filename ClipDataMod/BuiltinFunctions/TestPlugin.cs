@@ -1,4 +1,4 @@
-﻿//This plugin is to test the exception handling and should not be included in release builds
+﻿//This plugin is to test various functionality and should not be included in release builds
 #if DEBUG
 using Plugin;
 using Plugin.MenuItems;
