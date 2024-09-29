@@ -28,6 +28,7 @@ namespace ClipDataMod.BuiltinFunctions
             _menuDescriptor.Items.Add(new BaseMenuDescriptor("Open in default application", null, OpenUrl));
             _menuDescriptor.Items.Add(new BaseMenuDescriptor("Save target as file...", null, DownloadUrlFile));
             _menuDescriptor.Items.Add(new BaseMenuDescriptor("Save target to clipboard", null, DownloadUrlCb));
+            _menuDescriptor.Items.Add(new BaseMenuDescriptor("Extract file name", null, ExtractFileName));
             _menuDescriptor.Items.Add(new BaseMenuDescriptor("Remove 'UTM' tracker", null, (_) => RemoveTracker(false)));
             var autoMenu = new BaseMenuDescriptor("Automatically remove 'UTM' tracker", null, ToggleAutoTrackerRemove);
             _menuDescriptor.Items.Add(autoMenu);
@@ -46,6 +47,29 @@ namespace ClipDataMod.BuiltinFunctions
                 catch (Exception ex)
                 {
                     PluginHelper.Dialog.Exception(ex, $"Failed to open {url}", this);
+                }
+            }
+            else
+            {
+                PluginHelper.Dialog.Error("Clipboard does not contain valid URL", Name);
+            }
+        }
+
+        private void ExtractFileName(IMenuDescriptor menuDescriptor)
+        {
+            if (Uri.TryCreate(PluginHelper.Clipboard.GetString(), UriKind.Absolute, out var url))
+            {
+                var path = url.AbsolutePath;
+                if (!path.EndsWith('/'))
+                {
+                    var fileName = Uri.UnescapeDataString(url.AbsolutePath).Split('/').Last();
+                    PluginHelper.Clipboard.Clear();
+                    PluginHelper.Clipboard.SetString(fileName);
+                    PluginHelper.Dialog.NotifyInfo($"Extracted '{fileName}' from URL", "File name extraction");
+                }
+                else
+                {
+                    PluginHelper.Dialog.Error("The URL path ends in '/' which indicates it refers to a directory, not a file", "No file name");
                 }
             }
             else
