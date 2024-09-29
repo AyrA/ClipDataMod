@@ -10,6 +10,7 @@ Built-in functions include:
 - Binary to text or image converter
 - Save clipboard contents as file
 - Binary to hex
+- JSON validation, format, and compact
 - SHA hashing
 - URL downloader
 
