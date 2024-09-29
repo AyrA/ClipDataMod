@@ -25,6 +25,13 @@ namespace Plugin
         /// <summary>
         /// URL of the plugin
         /// </summary>
+        /// <remarks>
+        /// This is opened when an exception happens,
+        /// provided it is "http(s)" or "mailto".
+        /// If this is null or an unsupported protocol,
+        /// the user will not be able to report errors.
+        /// They will still get the option to export error data to clipboard.
+        /// </remarks>
         Uri? Url { get; }
 
         /// <summary>
