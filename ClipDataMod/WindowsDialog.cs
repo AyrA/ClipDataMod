@@ -15,6 +15,8 @@ namespace ClipDataMod
             this.notifyIcon = notifyIcon;
         }
 
+        #region internals
+
         private static string Filter(string s) => s.Replace('|', '¦');
 
         private static string ConvertMask(FilterMask mask)
@@ -81,6 +83,10 @@ namespace ClipDataMod
             return (ButtonResult)(int)MessageBox.Show(text, title, (MessageBoxButtons)(int)buttons, icon);
         }
 
+        #endregion
+
+        #region Message box
+
         public ButtonResult Error(string text, string title, DialogButtons buttons = DialogButtons.OK)
         {
             return Box(text, title, buttons, MessageBoxIcon.Error);
@@ -105,6 +111,10 @@ namespace ClipDataMod
                 ed.Show();
             });
         }
+
+        #endregion
+
+        #region Filesystem dialogs
 
         public string? OpenFile(string title, FilterMask mask)
         {
@@ -261,6 +271,10 @@ namespace ClipDataMod
             return null;
         }
 
+        #endregion
+
+        #region Notifications
+
         public void NotifyInfo(string text, string title)
         {
             notifyIcon.ShowBalloonTip(5000, title, text, ToolTipIcon.Info);
@@ -275,5 +289,7 @@ namespace ClipDataMod
         {
             notifyIcon.ShowBalloonTip(5000, title, text, ToolTipIcon.Error);
         }
+
+        #endregion
     }
 }

@@ -199,7 +199,7 @@ namespace ClipDataMod
                 List<IMenuDescriptor> processed = [];
                 Stack<IMenuDescriptor> pending = [];
 
-                pending.Push(descriptor);
+                pending.Push(MenuDescriptor);
 
                 while (pending.Count > 0)
                 {
