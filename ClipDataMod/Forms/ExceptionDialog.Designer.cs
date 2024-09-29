@@ -110,12 +110,12 @@
             // BtnExport
             // 
             BtnExport.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            BtnExport.Location = new Point(316, 326);
+            BtnExport.Location = new Point(290, 326);
             BtnExport.Name = "BtnExport";
-            BtnExport.Size = new Size(75, 23);
+            BtnExport.Size = new Size(101, 23);
             BtnExport.TabIndex = 4;
-            BtnExport.Text = "Export...";
-            ToolTipHelp.SetToolTip(BtnExport, "Export primary exception to JSON");
+            BtnExport.Text = "Report a bug";
+            ToolTipHelp.SetToolTip(BtnExport, "Export exception details to JSON");
             BtnExport.UseVisualStyleBackColor = true;
             BtnExport.Click += BtnExport_Click;
             // 
